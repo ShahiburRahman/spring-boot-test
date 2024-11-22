@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="003" author="shahibur">
+        <loadData
+                file="db/changelog/data/users.csv"
+                tableName="users">
+            <column name="username" type="STRING"/>
+            <column name="email" type="STRING"/>
+            <column name="active" type="BOOLEAN"/>
+        </loadData>
+
+        <rollback>
+            <!-- Add a specific condition to only delete the records loaded from CSV -->
+            <delete tableName="users">
+                <where>email LIKE '%@example.com'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+    <changeSet id="004" author="shahibur">
+<!--add roles to the user roles table for each user from user table-->
+        <sql>
+            INSERT INTO user_roles (user_id, role)
+            SELECT id, 'USER' FROM users;
+        </sql>
+        <rollback>
+            <delete tableName="user_roles">
+                <where>role = 'USER'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
